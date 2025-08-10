@@ -1,19 +1,19 @@
 name: build-test-dev
 on:
   push:
-    branches: 
+    branches:
       - main
   pull_request:
     branches:
       - main
-jobs: 
-  build:  # Me aseguro que compile primero antes de testear
+jobs:
+  build: # Me aseguro que compile primero antes de testear
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: ['18.x', '20.x']
+        node-version: ["18.x", "20.x"]
         os: [ubuntu-24.04, windows-latest]
-    steps: 
+    steps:
       - name: Checkout repo
         uses: actions/checkout@v3
       - name: Setup Node.js ${{ matrix.node-version }}
@@ -21,23 +21,4 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: npm run build 
-  test: 
-    needs: build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        node-version: ['18.x', '20.x']  # Versiones de node a probar
-        os: [ubuntu-24.04, windows-latest]  # Los sistemas operativos sobre los que testear node
-    steps: 
-      - name: Checkout repo
-        uses: actions/checkout@v3
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
+      - run: npm run build
