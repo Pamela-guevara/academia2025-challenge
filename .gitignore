@@ -13,6 +13,8 @@ database.sqlite
 # Variables de entorno
 .env
 secrets/
+secrets/*
+*/secrets/*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

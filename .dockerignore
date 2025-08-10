@@ -28,4 +28,5 @@ Thumbs.db
 
 # Secrets
 secrets/
+secrets/*
 */secrets/*
