@@ -11,7 +11,7 @@ lerna-debug.log*
 database.sqlite
 
 # Variables de entorno
-# .env
+.env
 secrets/
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
