@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-challenge-dev
+    restart: unless-stopped
+    healthcheck: # Healtcheck para asegurarse que la DB funcione antes que se levante la app
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_HOST: ${DB_HOST}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - academia_challenge
+
+  appChallenge:
+    image: challenge_academia:1.0.0
+    container_name: app-challenge-dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - academia_challenge
+
+volumes:
+  postgres_data:
+
+networks:
+  academia_challenge:
+    external: true

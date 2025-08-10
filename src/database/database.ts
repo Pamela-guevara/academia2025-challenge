@@ -1,12 +1,12 @@
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 // Configuración de la base de datos PostgreSQL
 const DB_CONFIG = {
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'challege_api',
-  password: process.env.DB_PASSWORD || 'postgres',
-  port: parseInt(process.env.DB_PORT || '5432'),
+  user: process.env.DB_USER || "postgres",
+  host: process.env.DB_HOST || "localhost",
+  database: process.env.DB_NAME || "challenge_api",
+  password: process.env.DB_PASSWORD || "postgres",
+  port: parseInt(process.env.DB_PORT || "5432"),
 };
 
 export class Database {
@@ -21,22 +21,26 @@ export class Database {
     try {
       // Probar conexión
       const client = await this.pool.connect();
-      console.log('✅ Conectado a PostgreSQL');
+      console.log("✅ Conectado a PostgreSQL");
       client.release();
-      
+
       // Inicializar tablas
       await this.initializeTables();
     } catch (err) {
-      console.error('❌ Error al conectar con PostgreSQL:', err);
-      console.log('📋 Configuración de base de datos:');
+      console.error("❌ Error al conectar con PostgreSQL:", err);
+      console.log("📋 Configuración de base de datos:");
       console.log(`   Host: ${DB_CONFIG.host}:${DB_CONFIG.port}`);
       console.log(`   Database: ${DB_CONFIG.database}`);
       console.log(`   User: ${DB_CONFIG.user}`);
-      console.log('');
-      console.log('🔧 Para configurar PostgreSQL:');
-      console.log('   1. Instala PostgreSQL');
-      console.log('   2. Crea la base de datos: CREATE DATABASE challege_api;');
-      console.log('   3. O configura variables de entorno: DB_HOST, DB_USER, DB_PASSWORD, etc.');
+      console.log("");
+      console.log("🔧 Para configurar PostgreSQL:");
+      console.log("   1. Instala PostgreSQL");
+      console.log(
+        "   2. Crea la base de datos: CREATE DATABASE challenge_api;"
+      );
+      console.log(
+        "   3. O configura variables de entorno: DB_HOST, DB_USER, DB_PASSWORD, etc."
+      );
     }
   }
 
@@ -54,7 +58,7 @@ export class Database {
       `;
 
       await this.pool.query(createUsersTable);
-      console.log('✅ Tabla users lista');
+      console.log("✅ Tabla users lista");
 
       // Crear tabla de productos si no existe
       const createProductsTable = `
@@ -72,18 +76,20 @@ export class Database {
       `;
 
       await this.pool.query(createProductsTable);
-      console.log('✅ Tabla products lista');
-      
+      console.log("✅ Tabla products lista");
+
       await this.insertInitialData();
     } catch (err) {
-      console.error('Error al crear tablas:', err);
+      console.error("Error al crear tablas:", err);
     }
   }
 
   private async insertInitialData() {
     try {
       // Verificar si ya hay datos de usuarios
-      const userResult = await this.pool.query('SELECT COUNT(*) as count FROM users');
+      const userResult = await this.pool.query(
+        "SELECT COUNT(*) as count FROM users"
+      );
       const userCount = parseInt(userResult.rows[0].count);
 
       // Si no hay usuarios, insertar datos de prueba
@@ -96,12 +102,14 @@ export class Database {
         `;
 
         const insertResult = await this.pool.query(insertUsers);
-        console.log('✅ Datos iniciales de usuarios insertados');
+        console.log("✅ Datos iniciales de usuarios insertados");
         console.log(`   ${insertResult.rows.length} usuarios creados`);
       }
 
       // Verificar si ya hay datos de productos
-      const productResult = await this.pool.query('SELECT COUNT(*) as count FROM products');
+      const productResult = await this.pool.query(
+        "SELECT COUNT(*) as count FROM products"
+      );
       const productCount = parseInt(productResult.rows[0].count);
 
       // Si no hay productos, insertar datos de prueba
@@ -117,59 +125,76 @@ export class Database {
         `;
 
         const insertProductResult = await this.pool.query(insertProducts);
-        console.log('✅ Datos iniciales de productos insertados');
+        console.log("✅ Datos iniciales de productos insertados");
         console.log(`   ${insertProductResult.rows.length} productos creados`);
       }
     } catch (err) {
-      console.error('Error al insertar datos iniciales:', err);
+      console.error("Error al insertar datos iniciales:", err);
     }
   }
 
   // Métodos para operaciones CRUD de usuarios
   async getAllUsers(): Promise<any[]> {
     try {
-      const result = await this.pool.query('SELECT id, name, email, created_at FROM users ORDER BY id');
+      const result = await this.pool.query(
+        "SELECT id, name, email, created_at FROM users ORDER BY id"
+      );
       return result.rows;
     } catch (err) {
-      console.error('Error en getAllUsers:', err);
+      console.error("Error en getAllUsers:", err);
       throw err;
     }
   }
 
   async getUserById(id: number): Promise<any> {
     try {
-      const result = await this.pool.query('SELECT id, name, email, created_at FROM users WHERE id = $1', [id]);
+      const result = await this.pool.query(
+        "SELECT id, name, email, created_at FROM users WHERE id = $1",
+        [id]
+      );
       return result.rows[0] || null;
     } catch (err) {
-      console.error('Error en getUserById:', err);
+      console.error("Error en getUserById:", err);
       throw err;
     }
   }
 
   async getUserByEmail(email: string): Promise<any> {
     try {
-      const result = await this.pool.query('SELECT * FROM users WHERE email = $1', [email]);
+      const result = await this.pool.query(
+        "SELECT * FROM users WHERE email = $1",
+        [email]
+      );
       return result.rows[0] || null;
     } catch (err) {
-      console.error('Error en getUserByEmail:', err);
+      console.error("Error en getUserByEmail:", err);
       throw err;
     }
   }
 
-  async createUser(name: string, email: string, password: string): Promise<any> {
+  async createUser(
+    name: string,
+    email: string,
+    password: string
+  ): Promise<any> {
     try {
       const result = await this.pool.query(
-        'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
+        "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at",
         [name, email, password]
       );
       return result.rows[0];
     } catch (err) {
-      console.error('Error en createUser:', err);
+      console.error("Error en createUser:", err);
       throw err;
     }
   }
 
-  async updateUser(id: number, name?: string, email?: string, password?: string): Promise<any> {
+  async updateUser(
+    id: number,
+    name?: string,
+    email?: string,
+    password?: string
+  ): Promise<any> {
     try {
       // Construir query dinámicamente
       const updates: string[] = [];
@@ -193,21 +218,23 @@ export class Database {
       }
 
       if (updates.length === 0) {
-        throw new Error('No hay campos para actualizar');
+        throw new Error("No hay campos para actualizar");
       }
 
       values.push(id);
-      const query = `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramCount} RETURNING id, name, email, created_at`;
+      const query = `UPDATE users SET ${updates.join(
+        ", "
+      )} WHERE id = $${paramCount} RETURNING id, name, email, created_at`;
 
       const result = await this.pool.query(query, values);
-      
+
       if (result.rows.length === 0) {
-        throw new Error('Usuario no encontrado');
+        throw new Error("Usuario no encontrado");
       }
-      
+
       return result.rows[0];
     } catch (err) {
-      console.error('Error en updateUser:', err);
+      console.error("Error en updateUser:", err);
       throw err;
     }
   }
@@ -215,20 +242,23 @@ export class Database {
   async deleteUser(id: number): Promise<any> {
     try {
       // Obtener los datos del usuario antes de eliminarlo
-      const selectResult = await this.pool.query('SELECT id, name, email, created_at FROM users WHERE id = $1', [id]);
-      
+      const selectResult = await this.pool.query(
+        "SELECT id, name, email, created_at FROM users WHERE id = $1",
+        [id]
+      );
+
       if (selectResult.rows.length === 0) {
-        throw new Error('Usuario no encontrado');
+        throw new Error("Usuario no encontrado");
       }
 
       const user = selectResult.rows[0];
-      
+
       // Eliminar el usuario
-      await this.pool.query('DELETE FROM users WHERE id = $1', [id]);
-      
+      await this.pool.query("DELETE FROM users WHERE id = $1", [id]);
+
       return user;
     } catch (err) {
-      console.error('Error en deleteUser:', err);
+      console.error("Error en deleteUser:", err);
       throw err;
     }
   }
@@ -244,70 +274,89 @@ export class Database {
       `);
       return result.rows;
     } catch (err) {
-      console.error('Error en getAllProducts:', err);
+      console.error("Error en getAllProducts:", err);
       throw err;
     }
   }
 
   async getProductById(id: number): Promise<any> {
     try {
-      const result = await this.pool.query(`
+      const result = await this.pool.query(
+        `
         SELECT id, name, description, price, stock, category, active, 
                created_at as "createdAt", updated_at as "updatedAt" 
         FROM products 
         WHERE id = $1
-      `, [id]);
+      `,
+        [id]
+      );
       return result.rows[0] || null;
     } catch (err) {
-      console.error('Error en getProductById:', err);
+      console.error("Error en getProductById:", err);
       throw err;
     }
   }
 
   async getProductsByCategory(category: string): Promise<any[]> {
     try {
-      const result = await this.pool.query(`
+      const result = await this.pool.query(
+        `
         SELECT id, name, description, price, stock, category, active, 
                created_at as "createdAt", updated_at as "updatedAt" 
         FROM products 
         WHERE category = $1 AND active = true
         ORDER BY name
-      `, [category]);
+      `,
+        [category]
+      );
       return result.rows;
     } catch (err) {
-      console.error('Error en getProductsByCategory:', err);
+      console.error("Error en getProductsByCategory:", err);
       throw err;
     }
   }
 
   async searchProducts(searchTerm: string): Promise<any[]> {
     try {
-      const result = await this.pool.query(`
+      const result = await this.pool.query(
+        `
         SELECT id, name, description, price, stock, category, active, 
                created_at as "createdAt", updated_at as "updatedAt" 
         FROM products 
         WHERE (name ILIKE $1 OR description ILIKE $1 OR category ILIKE $1) 
         AND active = true
         ORDER BY name
-      `, [`%${searchTerm}%`]);
+      `,
+        [`%${searchTerm}%`]
+      );
       return result.rows;
     } catch (err) {
-      console.error('Error en searchProducts:', err);
+      console.error("Error en searchProducts:", err);
       throw err;
     }
   }
 
-  async createProduct(name: string, description: string, price: number, stock: number, category: string, active: boolean = true): Promise<any> {
+  async createProduct(
+    name: string,
+    description: string,
+    price: number,
+    stock: number,
+    category: string,
+    active: boolean = true
+  ): Promise<any> {
     try {
-      const result = await this.pool.query(`
+      const result = await this.pool.query(
+        `
         INSERT INTO products (name, description, price, stock, category, active) 
         VALUES ($1, $2, $3, $4, $5, $6) 
         RETURNING id, name, description, price, stock, category, active, 
                   created_at as "createdAt", updated_at as "updatedAt"
-      `, [name, description, price, stock, category, active]);
+      `,
+        [name, description, price, stock, category, active]
+      );
       return result.rows[0];
     } catch (err) {
-      console.error('Error en createProduct:', err);
+      console.error("Error en createProduct:", err);
       throw err;
     }
   }
@@ -319,8 +368,15 @@ export class Database {
       let paramCount = 1;
 
       // Campos permitidos para actualizar
-      const allowedFields = ['name', 'description', 'price', 'stock', 'category', 'active'];
-      
+      const allowedFields = [
+        "name",
+        "description",
+        "price",
+        "stock",
+        "category",
+        "active",
+      ];
+
       for (const field of allowedFields) {
         if (updates[field] !== undefined) {
           fields.push(`${field} = $${paramCount}`);
@@ -330,7 +386,7 @@ export class Database {
       }
 
       if (fields.length === 0) {
-        throw new Error('No hay campos para actualizar');
+        throw new Error("No hay campos para actualizar");
       }
 
       // Agregar updated_at
@@ -339,21 +395,21 @@ export class Database {
 
       const query = `
         UPDATE products 
-        SET ${fields.join(', ')} 
+        SET ${fields.join(", ")} 
         WHERE id = $${paramCount} 
         RETURNING id, name, description, price, stock, category, active, 
                   created_at as "createdAt", updated_at as "updatedAt"
       `;
 
       const result = await this.pool.query(query, values);
-      
+
       if (result.rows.length === 0) {
-        throw new Error('Producto no encontrado');
+        throw new Error("Producto no encontrado");
       }
-      
+
       return result.rows[0];
     } catch (err) {
-      console.error('Error en updateProduct:', err);
+      console.error("Error en updateProduct:", err);
       throw err;
     }
   }
@@ -361,46 +417,52 @@ export class Database {
   async deleteProduct(id: number): Promise<any> {
     try {
       // Obtener los datos del producto antes de eliminarlo
-      const selectResult = await this.pool.query(`
+      const selectResult = await this.pool.query(
+        `
         SELECT id, name, description, price, stock, category, active, 
                created_at as "createdAt", updated_at as "updatedAt" 
         FROM products 
         WHERE id = $1
-      `, [id]);
-      
+      `,
+        [id]
+      );
+
       if (selectResult.rows.length === 0) {
-        throw new Error('Producto no encontrado');
+        throw new Error("Producto no encontrado");
       }
 
       const product = selectResult.rows[0];
-      
+
       // Eliminar el producto
-      await this.pool.query('DELETE FROM products WHERE id = $1', [id]);
-      
+      await this.pool.query("DELETE FROM products WHERE id = $1", [id]);
+
       return product;
     } catch (err) {
-      console.error('Error en deleteProduct:', err);
+      console.error("Error en deleteProduct:", err);
       throw err;
     }
   }
 
   async updateProductStock(id: number, newStock: number): Promise<any> {
     try {
-      const result = await this.pool.query(`
+      const result = await this.pool.query(
+        `
         UPDATE products 
         SET stock = $1, updated_at = CURRENT_TIMESTAMP 
         WHERE id = $2 
         RETURNING id, name, description, price, stock, category, active, 
                   created_at as "createdAt", updated_at as "updatedAt"
-      `, [newStock, id]);
-      
+      `,
+        [newStock, id]
+      );
+
       if (result.rows.length === 0) {
-        throw new Error('Producto no encontrado');
+        throw new Error("Producto no encontrado");
       }
-      
+
       return result.rows[0];
     } catch (err) {
-      console.error('Error en updateProductStock:', err);
+      console.error("Error en updateProductStock:", err);
       throw err;
     }
   }
@@ -409,9 +471,9 @@ export class Database {
   async close(): Promise<void> {
     try {
       await this.pool.end();
-      console.log('🔒 Conexión a PostgreSQL cerrada');
+      console.log("🔒 Conexión a PostgreSQL cerrada");
     } catch (err) {
-      console.error('Error al cerrar conexión:', err);
+      console.error("Error al cerrar conexión:", err);
       throw err;
     }
   }
@@ -419,7 +481,7 @@ export class Database {
   // Método para verificar salud de la conexión
   async healthCheck(): Promise<boolean> {
     try {
-      const result = await this.pool.query('SELECT 1');
+      const result = await this.pool.query("SELECT 1");
       return result.rows.length > 0;
     } catch (err) {
       return false;
