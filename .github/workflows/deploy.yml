@@ -20,12 +20,14 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.PINGGY_PORT }}
+          # Fuerzo a poner el nombre de la imagen en minúsculas, porque mi username contiene mayúsculas
+          run: IMAGE_NAME=$(echo "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${{ secrets.CHALLENGE_IMAGE }}" | tr '[:upper:]' '[:lower:]')
           script: |
             cd academia2025-challenge
             if docker service ls --format '{{.Name}}' | grep -q "challenge_academia_stack_appChallenge"; then
               echo "Servicio encontrado, actualizando con rolling update y rollback..."
               docker service update \
-                --image ghcr.io/${{ github.repository_owner }}/challenge_academia:latest \
+                --image $IMAGE_NAME
                 --update-parallelism 1 \
                 --update-delay 10s \
                 --update-failure-action rollback \
