@@ -25,11 +25,29 @@ jobs:
 
       - name: Deploy to Docker Swarm
         run: |
+          # Forzar nombre en lowercase para Docker
+          IMAGE="ghcr.io/${github.repository_owner,, }/${{ secrets.CHALLENGE_IMAGE }}:1.0.0"
+
+          echo "Deploying image: $IMAGE"
+          
           ssh -p ${{ secrets.PINGGY_PORT }} \
-              ${{ secrets.SERVER_USERNAME }}@${{ secrets.PINGY_URL }} << EOF
-            docker pull ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:v1.0.0
+              ${{ secrets.SERVER_USERNAME }}@${{ secrets.PINGY_URL }} bash -s << EOF
+
+              "docker login ghcr.io -u ${{ github.actor }} --password-stdin <<< '${{ secrets.CHALLENGE_PAT }}' && \
+               docker pull ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:1.0.0 && \
+               docker service update \
+                 --image ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:1.0.0 \
+                 --update-parallelism 1 \
+                 --update-delay 10s \
+                 --update-failure-action rollback \
+                 academia_stack_appChallenge"
+
+
+            echo "Haciendo pull de la imagen $IMAGE"
+            docker pull $IMAGE
+            
             docker service update \
-              --image ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:v1.0.0 \
+              --image ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:1.0.0 \
               --update-parallelism 1 \
               --update-delay 10s \
               --update-failure-action rollback \
