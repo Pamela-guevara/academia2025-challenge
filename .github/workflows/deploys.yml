@@ -1,0 +1,29 @@
+name: deploy-DEV
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+   
+    - name: Run docker-compose to PROD
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.PINGY_URL }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_KEY }}
+        port: ${{ secrets.PINGGY_PORT }}
+        script: |
+          cd academia2025-challenge
+          # Elimino los servicios si ya existen en el servidor, sino sigue al docker compose swarm
+          docker service rm -f challenge_academia_stack || true
+          docker stack deploy -c docker-compose-PROD.yml challenge_academia_stack -d 
