@@ -21,7 +21,7 @@ jobs:
       - name: Deploy to Docker Swarm
         run: |
           ssh -p ${{ secrets.PINGGY_PORT }} \
-              ${{ secrets.SERVER_USERNAME }}@${{ secrets.PINGGY_URL }} << EOF
+              ${{ secrets.SERVER_USERNAME }}@${{ secrets.PINGY_URL }} << EOF
             docker pull ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:v1.0.0
             docker service update \
               --image ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:v1.0.0 \
