@@ -63,12 +63,140 @@ services:
     networks:
       - academia_challenge_net
 
+  node-exporter:
+    image: prom/node-exporter:latest
+    command:
+      - "--path.rootfs=/host"
+    volumes:
+      - "/:/host:ro,rslave"
+    networks:
+      - academia_challenge_net
+    deploy:
+      mode: global # una instancia por nodo del Swarm
+      restart_policy:
+        condition: on-failure
+    ports:
+      - target: 9100
+        published: 9100
+        protocol: tcp
+        mode: host
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro # Necesita acceder a los registros de docker para leer métricas
+    networks:
+      - academia_challenge_net
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - target: 9090
+        published: 9090
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+    command:
+      - "--storage.tsdb.retention.time=15d" # Política de retención 15 días
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - target: 9187
+        published: 9187
+        protocol: tcp
+        mode: host
+    secrets:
+      - db_user
+      - db_password
+      - db_name
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/db_name
+      POSTGRES_USER_FILE: /run/secrets/db_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - /run/secrets:/run/secrets:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - target: 3010
+        published: 3010
+        protocol: tcp
+        mode: host
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  loki:
+    image: grafana/loki:2.8.2
+    ports:
+      - target: 3100
+        published: 3100
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:2.8.2
+    volumes:
+      - /var/log:/var/log:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+    command:
+      - --config.file=/etc/promtail/config.yaml
+
 volumes:
   postgres_data:
+  grafana_data:
+  loki_data:
 
 networks:
   academia_challenge_net:
-    driver: overlay
     external: true # La red ya está creada
 
 secrets:
