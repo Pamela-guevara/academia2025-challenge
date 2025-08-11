@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    deploy:
+      restart_policy:
+        condition: on-failure # Sólo se resetea en caso que falle el contenedor
+      resources:
+        limits:
+          cpus: "0.5" # Limito el uso del cpu al 50 %
+          memory: 512M # Limito el uso de memoria a un máximo de 512 MB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/db_user)"]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/db_name
+      POSTGRES_USER_FILE: /run/secrets/db_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    ports:
+      - target: 5432
+        published: 5432
+        protocol: tcp
+        mode: host
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - academia_challenge_net
+    secrets:
+      - db_user
+      - db_password
+      - db_name
+      - db_port
+
+  appChallenge:
+    image: ghcr.io/pamela-guevara/challenge_academia:1.0.0
+    depends_on:
+      - postgres
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure # Resetea en caso de falla
+        delay: 3s # Demora 5 seg entre intentos
+        max_attempts: 3 # Máximo 3 intentos fallidos
+      placement:
+        constraints: [node.role == manager] # las réplicas correrán en el nodo manager
+      resources:
+        limits:
+          cpus: "0.5" # Limito el uso del cpu al 50 %
+          memory: 512M # Limito el uso de memoria a un máximo de 512 MB
+      update_config:
+        parallelism: 1 # Actualiza 1 réplica a la vez
+        delay: 10s # Espera 10s entre actualizaciones
+        failure_action: rollback # Si falla, vuelve a la versión anterior
+        order: start-first # Levanta primero el nuevo contenedor antes de matar el viejo
+    ports:
+      - target: 3000 # Puerto del contenedor
+        published: 3000 # Puerto del host
+        protocol: tcp
+        mode: ingress # Balanceo de carga
+    environment:
+      DB_HOST: postgres # Nombre del servicio que contiene a la DB
+    networks:
+      - academia_challenge_net
+
+volumes:
+  postgres_data:
+
+networks:
+  academia_challenge_net:
+    driver: overlay
+    external: true # La red ya está creada
+
+secrets:
+  db_user:
+    file: ./secrets/db_user.txt
+  db_password:
+    file: ./secrets/db_password.txt
+  db_name:
+    file: ./secrets/db_name.txt
+  db_port:
+    file: ./secrets/db_port.txt
+  app_port:
+    file: ./secrets/app_port.txt
