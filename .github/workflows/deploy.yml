@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SERVER_KEY }}
+
+      - name: Deploy to Docker Swarm
+        run: |
+          ssh -p ${{ secrets.PINGGY_PORT }} \
+              ${{ secrets.SERVER_USERNAME }}@${{ secrets.PINGGY_URL }} << EOF
+            docker pull ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:v1.0.0
+            docker service update \
+              --image ghcr.io/${{ github.repository_owner }}/${{ secrets.CHALLENGE_IMAGE }}:v1.0.0 \
+              --update-parallelism 1 \
+              --update-delay 10s \
+              --update-failure-action rollback \
+              academia_stack_appChallenge
+            docker service ps --no-trunc academia_stack_appChallenge
+          EOF
+
+      - name: Notify Discord
+        if: always()
+        uses: Ilshidur/action-discord@master
+        with:
+          message: "Deployment ${{ job.status }} - Tag: v1.0.0 - Repo: ${{ github.repository }}"
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
