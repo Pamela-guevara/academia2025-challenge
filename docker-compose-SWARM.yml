@@ -99,22 +99,22 @@ services:
     networks:
       - academia_challenge_net
 
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   ports:
-  #     - target: 9090
-  #       published: 9090
-  #       protocol: tcp
-  #       mode: host
-  #   volumes:
-  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-  #   networks:
-  #     - academia_challenge_net
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
-  #   command:
-  #     - "--storage.tsdb.retention.time=15d" # Política de retención 15 días
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - target: 9090
+        published: 9090
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+    command:
+      - "--storage.tsdb.retention.time=15d" # Política de retención 15 días
   # postgres_exporter:
   #   image: prometheuscommunity/postgres-exporter:latest
   #   networks:
@@ -189,8 +189,8 @@ services:
 
 volumes:
   postgres_data:
-  grafana_data:
-  loki_data:
+#  grafana_data:
+#  loki_data:
 
 networks:
   academia_challenge_net:
