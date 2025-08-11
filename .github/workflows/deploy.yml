@@ -26,8 +26,9 @@ jobs:
       - name: Deploy to Docker Swarm
         run: |
           # Forzar nombre en lowercase para Docker
-          IMAGE="ghcr.io/${github.repository_owner,, }/${{ secrets.CHALLENGE_IMAGE }}:1.0.0"
+          IMAGE=$(echo "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${{ secrets.CHALLENGE_IMAGE }}:1.0.0" | tr '[:upper:]' '[:lower:]')
 
+          echo "Actor: ${{github.actor}}"
           echo "Deploying image: $IMAGE"
           
           ssh -p ${{ secrets.PINGGY_PORT }} \
