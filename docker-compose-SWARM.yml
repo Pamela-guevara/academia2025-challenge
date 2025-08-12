@@ -106,8 +106,9 @@ services:
         published: 9090
         protocol: tcp
         mode: host
-    #volumes:
-    #  - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
     networks:
       - academia_challenge_net
     deploy:
@@ -117,8 +118,10 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.retention.time=30d"
       - "--storage.tsdb.path=/prometheus"
-    volumes:
-      - prometheus_data:/prometheus
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+        mode: 0444
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
@@ -137,7 +140,8 @@ services:
       - db_password
       - db_name
     environment:
-      POSTGRES_DB_FILE: /run/secrets/db_name
+      DATA_SOURCE_URI: "$(cat /run/secrets/db_name)?sslmode=disable"
+      #  POSTGRES_DB_FILE: /run/secrets/db_name
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
 
@@ -202,12 +206,14 @@ networks:
 
 secrets:
   db_user:
-    file: ./secrets/db_user.txt
+    external: true
   db_password:
-    file: ./secrets/db_password.txt
+    external: true
   db_name:
-    file: ./secrets/db_name.txt
+    external: true
   db_port:
-    file: ./secrets/db_port.txt
-  app_port:
-    file: ./secrets/app_port.txt
+    external: true
+
+configs:
+  prometheus_config:
+    external: true
