@@ -69,7 +69,7 @@ services:
       - db_password
       - db_name
       - db_port
-      - app_port
+      #- app_port
     networks:
       - academia_challenge_net
 
@@ -151,7 +151,7 @@ services:
       - db_name
       - db_port
     environment:
-      PPOSTGRES_DB_PORT: /run/secrets/db_port
+      POSTGRES_DB_PORT: /run/secrets/db_port
       POSTGRES_DB_FILE: /run/secrets/db_name
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
@@ -217,20 +217,17 @@ networks:
 
 secrets:
   db_user:
-    ./secrets/db_name.txt
+     file: ./secrets/db_name.txt
     #external: true
   db_password:
-    ./secrets/db_name.txt
+     file: ./secrets/db_name.txt
     #external: true
   db_name:
-    ./secrets/db_name.txt
+     file: ./secrets/db_name.txt
     #external: true
   db_port:
-    ./secrets/db_name.txt
+     file: ./secrets/db_name.txt
     #external: true
-  app_port:
-    ./secrets/db_name.txt
-    #external:true
 
 configs:
   prometheus_config:
