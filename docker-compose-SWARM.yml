@@ -113,8 +113,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-    command:
-      - "--storage.tsdb.retention.time=15d" # Política de retención 15 días
+
   # postgres_exporter:
   #   image: prometheuscommunity/postgres-exporter:latest
   #   networks:
