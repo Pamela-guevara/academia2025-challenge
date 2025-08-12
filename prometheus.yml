@@ -2,13 +2,13 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "api"
+  - job_name: "appChallenge"
     static_configs:
-      - targets: ["api_host:3000"] # Cambiar "api_host" por el nombre del servicio en Docker
+      - targets: ["appChallenge:3000"] # Cambiar "api_host" por el nombre del servicio en Docker
 
   - job_name: "node_exporter"
     static_configs:
-      - targets: ["node_host:9100"] # O el nombre de cada nodo en Swarm
+      - targets: ["node-exporter:9100"] # O el nombre de cada nodo en Swarm
 
   - job_name: "cadvisor"
     static_configs:
