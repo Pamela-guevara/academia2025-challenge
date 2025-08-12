@@ -36,19 +36,11 @@ services:
     image: ghcr.io/pamela-guevara/challenge_academia:1.0.0
     depends_on:
       - postgres
-    command: >
-      sh -c "
-        until nc -z postgres 5432; do
-          echo 'Esperando a Postgres...';
-          sleep 5;
-        done;
-        exec npm start
-      "
     deploy:
       replicas: 3
       restart_policy:
         condition: on-failure # Resetea en caso de falla
-        delay: 3s # Demora 5 seg entre intentos
+        delay: 5s # Demora 5 seg entre intentos
         max_attempts: 3 # Máximo 3 intentos fallidos
       placement:
         constraints: [node.role == manager] # las réplicas correrán en el nodo manager
@@ -68,21 +60,27 @@ services:
         mode: ingress # Balanceo de carga
     environment:
       DB_HOST: postgres # Nombre del servicio que contiene a la DB
-      DB_PORT: /run/secrets/db_port
-      DB_NAME_FILE: /run/secrets/db_name
-      DB_USER_FILE: /run/secrets/db_user
-      DB_PASSWORD_FILE: /run/secrets/db_password
-    secrets:
-      - db_user
-      - db_password
-      - db_name
-      - db_port
-      - app_port
+      DB_PORT: 5432
+      DB_NAME: challenge_api
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+#      DB_PORT_FILE: /run/secrets/db_port
+#      DB_NAME_FILE: /run/secrets/db_name
+#      DB_USER_FILE: /run/secrets/db_user
+#      DB_PASSWORD_FILE: /run/secrets/db_password
+#    secrets:
+#      - db_user
+#      - db_password
+#      - db_name
+#      - db_port
+#      - app_port
     networks:
       - academia_challenge_net
 
   node-exporter:
     image: prom/node-exporter:latest
+    depends_on:
+     - appChallenge
     command:
       - "--path.rootfs=/host"
     volumes:
@@ -101,6 +99,8 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
+    depends_on:
+      - appChallenge
     deploy:
       restart_policy:
         condition: on-failure
@@ -119,6 +119,8 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    depends_on:
+     - appChallenge
     ports:
       - target: 9090
         published: 9090
@@ -143,6 +145,8 @@ services:
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
+    depends_on:
+      - appChallenge
     networks:
       - academia_challenge_net
     deploy:
