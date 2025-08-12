@@ -106,13 +106,19 @@ services:
         published: 9090
         protocol: tcp
         mode: host
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    #volumes:
+    #  - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
       - academia_challenge_net
     deploy:
       restart_policy:
         condition: on-failure
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - prometheus_data:/prometheus
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
@@ -134,8 +140,6 @@ services:
       POSTGRES_DB_FILE: /run/secrets/db_name
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-    volumes:
-      - /run/secrets:/run/secrets:ro
 
   # grafana:
   #   image: grafana/grafana:latest
@@ -188,6 +192,7 @@ services:
 
 volumes:
   postgres_data:
+  prometheus_data:
 #  grafana_data:
 #  loki_data:
 
