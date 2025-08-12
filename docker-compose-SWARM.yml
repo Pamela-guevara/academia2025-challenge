@@ -139,9 +139,10 @@ services:
       - db_user
       - db_password
       - db_name
+      - db_port
     environment:
-      DATA_SOURCE_URI: "$(cat /run/secrets/db_name)?sslmode=disable"
-      #  POSTGRES_DB_FILE: /run/secrets/db_name
+      PPOSTGRES_DB_PORT: /run/secrets/db_port
+      POSTGRES_DB_FILE: /run/secrets/db_name
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
 
