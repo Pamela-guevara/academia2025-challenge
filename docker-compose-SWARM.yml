@@ -60,6 +60,15 @@ services:
         mode: ingress # Balanceo de carga
     environment:
       DB_HOST: postgres # Nombre del servicio que contiene a la DB
+      DB_PORT: /run/secrets/db_port
+      DB_NAME_FILE: /run/secrets/db_name
+      DB_USER_FILE: /run/secrets/db_user
+      DB_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_user
+      - db_password
+      - db_name
+      - db_port
     networks:
       - academia_challenge_net
 
