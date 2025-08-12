@@ -236,6 +236,9 @@ secrets:
   db_port:
     file: ./secrets/db_name.txt
     #external: true
+  app_port:
+    file: ./secrets/app_port.txt
+    #external: true
 
 configs:
   prometheus_config:
