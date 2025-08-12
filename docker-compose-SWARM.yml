@@ -69,6 +69,7 @@ services:
       - db_password
       - db_name
       - db_port
+      - app_port
     networks:
       - academia_challenge_net
 
@@ -216,13 +217,20 @@ networks:
 
 secrets:
   db_user:
-    external: true
+    ./secrets/db_name.txt
+    #external: true
   db_password:
-    external: true
+    ./secrets/db_name.txt
+    #external: true
   db_name:
-    external: true
+    ./secrets/db_name.txt
+    #external: true
   db_port:
-    external: true
+    ./secrets/db_name.txt
+    #external: true
+  app_port:
+    ./secrets/db_name.txt
+    #external:true
 
 configs:
   prometheus_config:
