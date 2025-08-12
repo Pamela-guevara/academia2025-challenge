@@ -34,11 +34,16 @@ services:
 
   appChallenge:
     image: ghcr.io/pamela-guevara/challenge_academia:1.0.0
-    #depends_on:
-    #  - postgres
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
+    command: >
+      sh -c "
+        until nc -z postgres 5432; do
+          echo 'Esperando a Postgres...';
+          sleep 5;
+        done;
+        exec npm start
+      "
     deploy:
       replicas: 3
       restart_policy:
