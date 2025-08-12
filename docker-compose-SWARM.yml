@@ -34,8 +34,11 @@ services:
 
   appChallenge:
     image: ghcr.io/pamela-guevara/challenge_academia:1.0.0
+    #depends_on:
+    #  - postgres
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     deploy:
       replicas: 3
       restart_policy:
@@ -69,7 +72,7 @@ services:
       - db_password
       - db_name
       - db_port
-      #- app_port
+      - app_port
     networks:
       - academia_challenge_net
 
@@ -217,16 +220,16 @@ networks:
 
 secrets:
   db_user:
-     file: ./secrets/db_name.txt
+    file: ./secrets/db_name.txt
     #external: true
   db_password:
-     file: ./secrets/db_name.txt
+    file: ./secrets/db_name.txt
     #external: true
   db_name:
-     file: ./secrets/db_name.txt
+    file: ./secrets/db_name.txt
     #external: true
   db_port:
-     file: ./secrets/db_name.txt
+    file: ./secrets/db_name.txt
     #external: true
 
 configs:
