@@ -2,9 +2,9 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "appChallenge"
-    static_configs:
-      - targets: ["appChallenge:3000"] # Cambiar "api_host" por el nombre del servicio en Docker
+  #- job_name: "appChallenge"
+  #  static_configs:
+  #    - targets: ["appChallenge:3000"] # Cambiar "api_host" por el nombre del servicio en Docker
 
   - job_name: "node_exporter"
     static_configs:

@@ -6,17 +6,18 @@ services:
         condition: on-failure # Sólo se resetea en caso que falle el contenedor
       resources:
         limits:
-          cpus: "0.5" # Limito el uso del cpu al 50 %
+          cpus: "0.75" # Limito el uso del cpu al 50 %
           memory: 512M # Limito el uso de memoria a un máximo de 512 MB
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/db_user)"]
       interval: 2s
-      timeout: 5s
-      retries: 5
+      timeout: 3s
+      retries: 3
     environment:
       POSTGRES_DB_FILE: /run/secrets/db_name
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_PORT_FILE: /run/secrets/db_port
     ports:
       - target: 5432
         published: 5432
@@ -54,43 +55,23 @@ services:
         failure_action: rollback # Si falla, vuelve a la versión anterior
         order: start-first # Levanta primero el nuevo contenedor antes de matar el viejo
     ports:
-      - target: 3000 # Puerto del contenedor
-        published: 3000 # Puerto del host
+      - target: 3003 # Puerto del contenedor
+        published: 3003 # Puerto del host
         protocol: tcp
         mode: ingress # Balanceo de carga
     environment:
       DB_HOST: postgres # Nombre del servicio que contiene a la DB
-      DB_PORT: 5432
-      DB_NAME: challenge_api
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-#      DB_PORT_FILE: /run/secrets/db_port
-#      DB_NAME_FILE: /run/secrets/db_name
-#      DB_USER_FILE: /run/secrets/db_user
-#      DB_PASSWORD_FILE: /run/secrets/db_password
-#    secrets:
-#      - db_user
-#      - db_password
-#      - db_name
-#      - db_port
-#      - app_port
     networks:
       - academia_challenge_net
 
   node-exporter:
     image: prom/node-exporter:latest
-    depends_on:
-     - appChallenge
     command:
       - "--path.rootfs=/host"
     volumes:
       - "/:/host:ro,rslave"
     networks:
       - academia_challenge_net
-    deploy:
-      mode: global # una instancia por nodo del Swarm
-      restart_policy:
-        condition: on-failure
     ports:
       - target: 9100
         published: 9100
@@ -120,7 +101,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     depends_on:
-     - appChallenge
+      - appChallenge
     ports:
       - target: 9090
         published: 9090
@@ -163,7 +144,7 @@ services:
       - db_name
       - db_port
     environment:
-      POSTGRES_DB_PORT: /run/secrets/db_port
+      POSTGRES_PORT_FILE: /run/secrets/db_port
       POSTGRES_DB_FILE: /run/secrets/db_name
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
@@ -229,20 +210,15 @@ networks:
 
 secrets:
   db_user:
-    file: ./secrets/db_name.txt
-    #external: true
+    file: ./secrets/db_user.txt
   db_password:
-    file: ./secrets/db_name.txt
-    #external: true
+    file: ./secrets/db_password.txt
   db_name:
     file: ./secrets/db_name.txt
-    #external: true
   db_port:
-    file: ./secrets/db_name.txt
-    #external: true
+    file: ./secrets/db_port.txt
   app_port:
     file: ./secrets/app_port.txt
-    #external: true
 
 configs:
   prometheus_config:
