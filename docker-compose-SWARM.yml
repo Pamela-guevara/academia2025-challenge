@@ -6,7 +6,7 @@ services:
         condition: on-failure # Sólo se resetea en caso que falle el contenedor
       resources:
         limits:
-          cpus: "0.75" # Limito el uso del cpu al 50 %
+          cpus: "0.95" # Limito el uso del cpu al 50 %
           memory: 512M # Limito el uso de memoria a un máximo de 512 MB
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/db_user)"]
