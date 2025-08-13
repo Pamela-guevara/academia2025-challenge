@@ -149,21 +149,21 @@ services:
       POSTGRES_USER_FILE: /run/secrets/db_user
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
 
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   ports:
-  #     - target: 3010
-  #       published: 3010
-  #       protocol: tcp
-  #       mode: host
-  #   volumes:
-  #     - grafana_data:/var/lib/grafana
-  #     - ./grafana/provisioning:/etc/grafana/provisioning:ro
-  #   networks:
-  #     - academia_challenge_net
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - target: 3010
+        published: 3010
+        protocol: tcp
+        mode: host
+    volumes:
+      - grafana_data:/var/lib/grafana
+#      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   # loki:
   #   image: grafana/loki:2.8.2
@@ -201,7 +201,7 @@ services:
 volumes:
   postgres_data:
   prometheus_data:
-#  grafana_data:
+  grafana_data:
 #  loki_data:
 
 networks:
