@@ -165,7 +165,8 @@ services:
         condition: on-failure
 
   loki:
-    image: grafana/loki:2.8.2
+    image: grafana/loki:2.9.3
+    user: "0:0"
     ports:
       - target: 3100
         published: 3100
