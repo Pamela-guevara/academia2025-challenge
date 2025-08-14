@@ -172,30 +172,28 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - ./loki-config.yml:/etc/loki/local-config.yml:ro
+      - ./loki-config.yml:/etc/loki/config/config.yml:ro
       - loki_data:/loki
     networks:
       - academia_challenge_net
     deploy:
       restart_policy:
         condition: on-failure
-    command: -config.file=/etc/loki/local-config.yml
+    command: 
+      - -config.file=/etc/loki/config/config.yml
 
-  # promtail:
-  # image: grafana/promtail:2.8.2
-  # volumes:
-  #   - /var/log:/var/log:ro
-  #   - /etc/machine-id:/etc/machine-id:ro
-  #   - ./promtail-config.yml:/etc/promtail/config.yml:ro
-  #   - /var/lib/docker/containers:/var/lib/docker/containers:ro
-  #   - /var/run/docker.sock:/var/run/docker.sock:ro
-  # networks:
-  #   - academia_challenge_net
-  # deploy:
-  #   restart_policy:
-  #     condition: on-failure
-  # command:
-  #   - --config.file=/etc/promtail/config.yml
+  promtail:
+    image: grafana/promtail:2.8.2
+    volumes:
+      - /var/log:/var/log:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+    command: -config.file=/etc/promtail/config.yml
 
 volumes:
   postgres_data:
