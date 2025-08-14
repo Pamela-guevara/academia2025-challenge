@@ -158,29 +158,28 @@ services:
         mode: host
     volumes:
       - grafana_data:/var/lib/grafana
-#      - ./grafana/provisioning:/etc/grafana/provisioning:ro
     networks:
       - academia_challenge_net
     deploy:
       restart_policy:
         condition: on-failure
 
-  # loki:
-  #   image: grafana/loki:2.8.2
-  #   ports:
-  #     - target: 3100
-  #       published: 3100
-  #       protocol: tcp
-  #       mode: host
-  #   volumes:
-  #     - ./loki-config.yml:/etc/loki/local-config.yml:ro
-  #     - loki_data:/loki
-  #   networks:
-  #     - academia_challenge_net
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
-  #   command: -config.file=/etc/loki/local-config.yml
+  loki:
+    image: grafana/loki:2.8.2
+    ports:
+      - target: 3100
+        published: 3100
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yml:ro
+      - loki_data:/loki
+    networks:
+      - academia_challenge_net
+    deploy:
+      restart_policy:
+        condition: on-failure
+    command: -config.file=/etc/loki/local-config.yml
 
   # promtail:
   # image: grafana/promtail:2.8.2
@@ -202,7 +201,7 @@ volumes:
   postgres_data:
   prometheus_data:
   grafana_data:
-#  loki_data:
+  loki_data:
 
 networks:
   academia_challenge_net:
