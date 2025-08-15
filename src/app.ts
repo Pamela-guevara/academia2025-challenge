@@ -8,7 +8,7 @@ import logger from './config/logger';
 import { httpLogger, errorLogger } from './middleware/logging';
 
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5006;
 
 // Middleware de logging (debe ir antes de otros middlewares)
 app.use(httpLogger);

@@ -31,6 +31,6 @@ RUN mkdir -p /app/logs && \
 
 USER pam_guevara
 
-EXPOSE 3000
+EXPOSE 5006
 
 CMD ["node", "dist/app.js"]

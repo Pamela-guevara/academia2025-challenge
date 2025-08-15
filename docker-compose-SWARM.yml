@@ -34,7 +34,7 @@ services:
       - db_port
 
   appChallenge:
-    image: ghcr.io/pamela-guevara/challenge_academia:1.0.0
+    image: ghcr.io/pamela-guevara/challenge_academia:1.2.1
     depends_on:
       - postgres
     deploy:
@@ -55,12 +55,33 @@ services:
         failure_action: rollback # Si falla, vuelve a la versión anterior
         order: start-first # Levanta primero el nuevo contenedor antes de matar el viejo
     ports:
-      - target: 3003 # Puerto del contenedor
-        published: 3003 # Puerto del host
+      - target: 5006 # Puerto del contenedor
+        published: 5006 # Puerto del host
         protocol: tcp
         mode: ingress # Balanceo de carga
     environment:
       DB_HOST: postgres # Nombre del servicio que contiene a la DB
+      DB_USER_FILE: /run/secrets/db_user
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_FILE: /run/secrets/db_name
+      DB_PORT_FILE: /run/secrets/db_port
+      PORT_FILE: /run/secrets/app_port
+    secrets:
+      - app_port
+      - db_user
+      - db_password
+      - db_name
+      - db_port
+   # command: >
+   #   sh -c '
+   #     echo "Esperando a PostgreSQL...";
+   #     until nc -z $$(cat /run/secrets/db_host) $$(cat /run/secrets/db_port); do
+   #       echo "PostgreSQL no disponible. Esperando...";
+   #       sleep 2;
+   #     done;
+   #     echo "PostgreSQL está disponible. Iniciando aplicación.";
+   #     exec node dist/index.js;
+   #   '
     networks:
       - academia_challenge_net
 
